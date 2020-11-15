@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const { v4 } = require('uuid');
 const app = express();
 const port = process.env.PORT || 4000;
 const cors = require('cors');
@@ -136,7 +135,7 @@ async function getTasks(id) {
 // ------------------	Sequelize
 
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('mysql://user:12345@localhost/todo_task', { query: { raw: true } });
+const sequelize = new Sequelize('mysql://b14946aa18a19e:ea04b13e@us-cdbr-east-02.cleardb.com/heroku_0af84d1250a300f', { query: { raw: true } });
 
 try {
   sequelize.authenticate()
