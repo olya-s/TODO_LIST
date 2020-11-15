@@ -176,6 +176,23 @@ Task.belongsTo(Todo);
 
 ; (async () => {
   await sequelize.sync()
+  let user1 = await User.create({ username: 'user1', password: 'passw1' });
+  let user2 = await User.create({ username: 'user2', password: 'passw2' });
+  let todo1 = await Todo.create({ userId: 1, title: 'Complete the test task for Ruby Garage' });
+  let todo2 = await Todo.create({ userId: 1, title: 'For Home' });
+  let todo3 = await Todo.create({ userId: 2, title: 'Some tasks' });
+  let todo4 = await Todo.create({ userId: 2, title: 'Other tasks' });
+  let task1 = await Task.create({ todoId: 1, text: 'Open this mock-up in Adobe Fireworks', marked: false });
+  let task2 = await Task.create({ todoId: 1, text: 'Attentively check the file', marked: false });
+  let task3 = await Task.create({ todoId: 1, text: 'Write HTML & CSS', marked: false });
+  let task4 = await Task.create({
+    todoId: 1, text: `Add Javascript to implenent adding / editing / removing for todo
+  items and lists taking into account as more use cases as possible`, marked: false
+  });
+  let task5 = await Task.create({ todoId: 2, text: 'Buy a milk', marked: false });
+  let task6 = await Task.create({ todoId: 2, text: 'Call mom', marked: false });
+  let task7 = await Task.create({ todoId: 2, text: 'Clean the room', marked: false });
+  let task8 = await Task.create({ todoId: 2, text: 'Repair the DVD player', marked: false });
 })();
 
 app.listen(port, () => { console.log(`Server has been started on port ${port}...`) });
