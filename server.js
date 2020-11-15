@@ -176,8 +176,6 @@ Task.belongsTo(Todo);
 
 ; (async () => {
   await sequelize.sync()
-  let user1 = await User.create({ username: 'user1', password: 'passw1' });
-  let user2 = await User.create({ username: 'user2', password: 'passw2' });
   let todo1 = await Todo.create({ userId: 1, title: 'Complete the test task for Ruby Garage' });
   let todo2 = await Todo.create({ userId: 1, title: 'For Home' });
   let todo3 = await Todo.create({ userId: 2, title: 'Some tasks' });
