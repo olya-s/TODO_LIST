@@ -7,6 +7,9 @@ async function onPageLoaded() {
   const newTodo = document.querySelector('.add-todo-btn');
   const container = document.querySelector('.container');
 
+  const now = new Date();
+  const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+
   if (!token) {
     createAuthForm(container);
   }
@@ -106,8 +109,8 @@ async function onPageLoaded() {
 
   async function getTodos(id) {
     todos = await request(`/todo/${id}`);
-    const todosList = todos.todos;
-    const tasksList = todos.tasks;
+    todosList = todos.todos;
+    tasksList = todos.tasks;
 
     for (let i = 0; i < todosList.length; i++) {
       const todo = todosList[i];
@@ -169,7 +172,12 @@ async function onPageLoaded() {
     const button = document.createElement('button');
     button.classList.add('add-task-btn');
     button.textContent = 'Add Task';
-    inputField.append(input, button);
+    const inputDate = document.createElement('input');
+    inputDate.className = 'task-deadline';
+    inputDate.type = 'date';
+    inputDate.value = date;
+    inputDate.min = date;
+    inputField.append(input, button, inputDate);
 
     inputRow.append(wrapper, inputField);
 
@@ -182,7 +190,8 @@ async function onPageLoaded() {
     assignEventHandlers(todoElem);
 
     if (tasks) {
-      const todoTasks = tasks.filter(task => task.todoId === todo.id);
+      const todoTasks = tasks.filter(task => task.todoId === todo.id)
+        .sort((task1, task2) => task1.ordinal > task2.ordinal ? 1 : -1);
       todoTasks.map(task => createTask(task));
     }
   }
@@ -190,6 +199,7 @@ async function onPageLoaded() {
   function assignEventHandlers(todo) {
     const h2 = todo.querySelector('h2');
     const tasks = Array.prototype.slice.call(todo.querySelectorAll('.task-text'));
+    const inputDate = document.querySelector('.task-deadline');
 
     todo.addEventListener('click', async (e) => {
       const elem = e.target;
@@ -198,10 +208,15 @@ async function onPageLoaded() {
       if (elem.classList.contains('add-task-btn')) {
         const input = todo.querySelector('.add-task-input');
         if (!!input.value) {
-          const newTask = await request(`/task/${todoElemId}`, 'POST', { text: input.value });
+          const newTask = await request(
+            `/task/${todoElemId}`,
+            'POST',
+            { text: input.value, date: inputDate.value }
+          );
           tasksList.push(newTask);
           createTask(newTask);
           input.value = '';
+          inputDate.style.display = 'none';
         }
       }
       else if (elem.classList.contains('icon-plus-wrapper') || elem.classList.contains('icon-plus')) {
@@ -226,48 +241,33 @@ async function onPageLoaded() {
         await request(`/task/${taskId}`, 'DELETE');
         task.remove();
       }
-      else if (elem.classList.contains('arrow-up-wrapper')) {
-        const currentTask = elem.closest('li');
-        const previousTask = elem.closest('li').previousElementSibling;
-        if (!!previousTask) {
-          const cloneCurrentTask = currentTask.cloneNode(true);
-          const clonePreviousTask = previousTask.cloneNode(true);
-          const parentElement = currentTask.parentElement;
-          parentElement.replaceChild(cloneCurrentTask, previousTask);
-          parentElement.replaceChild(clonePreviousTask, currentTask);
-        }
+      else if (elem.classList.contains('arrow-up-wrapper') || elem.classList.contains('arrow-up')) {
+        const firstTaskElem = elem.closest('li');
+        const secondTaskElem = elem.closest('li').previousElementSibling;
+        replaceTasks(firstTaskElem, secondTaskElem);
       }
-      else if (elem.classList.contains('arrow-down-wrapper')) {
-        const currentTask = elem.closest('li');
-        const nextTask = elem.closest('li').nextElementSibling;
-        if (!!nextTask) {
-          const cloneCurrentTask = currentTask.cloneNode(true);
-          const cloneNextTask = nextTask.cloneNode(true);
-          const parentElement = currentTask.parentElement;
-          parentElement.replaceChild(cloneCurrentTask, nextTask);
-          parentElement.replaceChild(cloneNextTask, currentTask);
-        }
+      else if (elem.classList.contains('arrow-down-wrapper') || elem.classList.contains('arrow-down')) {
+        const firstTaskElem = elem.closest('li').nextElementSibling;
+        const secondTaskElem = elem.closest('li');
+        replaceTasks(firstTaskElem, secondTaskElem);
       }
-      else if (elem.classList.contains('arrow-up')) {
-        const currentTask = elem.closest('li');
-        const previousTask = elem.closest('li').previousElementSibling;
-        if (!!previousTask) {
-          const cloneCurrentTask = currentTask.cloneNode(true);
-          const clonePreviousTask = previousTask.cloneNode(true);
-          const parentElement = currentTask.parentElement;
-          parentElement.replaceChild(cloneCurrentTask, previousTask);
-          parentElement.replaceChild(clonePreviousTask, currentTask);
-        }
-      }
-      else if (elem.classList.contains('arrow-down')) {
-        const currentTask = elem.closest('li');
-        const nextTask = elem.closest('li').nextElementSibling;
-        if (!!nextTask) {
-          const cloneCurrentTask = currentTask.cloneNode(true);
-          const cloneNextTask = nextTask.cloneNode(true);
-          const parentElement = currentTask.parentElement;
-          parentElement.replaceChild(cloneCurrentTask, nextTask);
-          parentElement.replaceChild(cloneNextTask, currentTask);
+
+      async function replaceTasks(firstTaskElem, secondTaskElem) {
+        const firstTaskElemId = +firstTaskElem.dataset.id;
+        const secondTaskElemId = +secondTaskElem.dataset.id;
+        const firstTask = tasksList.find(t => t.id === firstTaskElemId);
+        const secondTask = tasksList.find(t => t.id === secondTaskElemId);
+        if (!!firstTaskElem) {
+          let buf = firstTaskElem.dataset.ordinal;
+          firstTaskElem.dataset.ordinal = secondTaskElem.dataset.ordinal;
+          secondTaskElem.dataset.ordinal = buf;
+          const cloneFirstTaskElem = firstTaskElem.cloneNode(true);
+          const cloneSecondTaskElem = secondTaskElem.cloneNode(true);
+          const parentElement = firstTaskElem.parentElement;
+          parentElement.replaceChild(cloneFirstTaskElem, secondTaskElem);
+          parentElement.replaceChild(cloneSecondTaskElem, firstTaskElem);
+          await request(`/task/${firstTaskElemId}`, 'PUT', { ...firstTask, ordinal: firstTaskElem.dataset.ordinal });
+          await request(`/task/${secondTaskElemId}`, 'PUT', { ...secondTask, ordinal: secondTaskElem.dataset.ordinal });
         }
       }
 
@@ -276,18 +276,27 @@ async function onPageLoaded() {
     todo.addEventListener('keypress', async (e) => {
       const elem = e.target;
       const todoElem = e.currentTarget;
-      if (e.keyCode === 'Enter') {
+      const keyEnter = 13;
+      if (elem.classList.contains('add-task-input')) {
+        inputDate.style.display = 'block';
+      }
+      if (e.keyCode === keyEnter) {
         if (elem.tagName === 'H2' || elem.classList.contains('task-text')) {
           elem.blur();
         }
         else if (elem.classList.contains('add-task-input')) {
           if (!!elem.value) {
-            const newTask = await request(`/task/${todoElem.dataset.id}`, 'POST', { text: elem.value });
+            const newTask = await request(
+              `/task/${todoElem.dataset.id}`,
+              'POST',
+              { text: elem.value, date: inputDate.value }
+            );
             if (newTask) {
               tasksList.push(newTask);
               createTask(newTask);
               elem.value = '';
               elem.blur();
+              inputDate.style.display = 'none';
             }
           }
         }
@@ -375,9 +384,10 @@ async function onPageLoaded() {
 
       checkboxInput.addEventListener('change', async (e) => {
         const elem = e.target;
-        const taskId = elem.closest('.list-item').dataset.id;
+        const taskId = +elem.closest('.list-item').dataset.id;
         const task = tasksList.find(t => t.id === taskId);
-        await request(`/task/${taskId}`, 'PUT', { ...task, checked: elem.checked });
+        task.marked = !task.marked;
+        await request(`/task/${taskId}`, 'PUT', { ...task, marked: elem.checked });
       })
     }
   }

@@ -97,7 +97,8 @@ app.post('/todo/:userId', async (req, res) => {
   res.status(201).json(todo);
 });
 app.post('/task/:todoId', async (req, res) => {
-  const task = await Task.create({ todoId: req.params.todoId, ...req.body });
+  let max = await Task.max('ordinal', { where: { todoId: req.params.todoId } });
+  const task = await Task.create({ ordinal: max + 1, todoId: req.params.todoId, ...req.body });
   res.status(201).json(task);
 });
 
@@ -118,7 +119,12 @@ app.put('/todo/:id', async (req, res) => {
   res.status(200).json({ message: "success" });
 });
 app.put('/task/:id', async (req, res) => {
-  const task = await Task.update({ text: req.body.text, marked: Number(req.body.checked) }, { where: { id: req.params.id } });
+  const task = await Task.update({
+    text: req.body.text,
+    marked: Number(req.body.marked),
+    ordinal: req.body.ordinal
+  },
+    { where: { id: req.params.id } });
   res.status(200).json({ message: "success" });
 });
 
@@ -166,7 +172,9 @@ class Task extends Sequelize.Model { }
 
 Task.init({
   text: Sequelize.TEXT,
-  marked: Sequelize.TINYINT
+  marked: Sequelize.TINYINT,
+  ordinal: Sequelize.INTEGER,
+  date: Sequelize.STRING
 }, { sequelize, modelName: 'task' });
 
 User.hasMany(Todo);
