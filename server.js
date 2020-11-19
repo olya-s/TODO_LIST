@@ -184,8 +184,6 @@ Task.belongsTo(Todo);
 
 ; (async () => {
   await sequelize.sync();
-  let user1 = await User.create({ username: 'user1', password: 'passw1' });
-  let user2 = await User.create({ username: 'user2', password: 'passw2' });
 })();
 
 app.listen(port, () => { console.log(`Server has been started on port ${port}...`) });
