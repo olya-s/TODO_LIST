@@ -81,10 +81,17 @@
 .todo .input-field {
   width: 90%;
   display: flex;
+  position: relative;
   justify-content: stretch;
 }
 .todo .add-task-input {
   width: 85%;
+  line-height: 2;
+}
+.todo .task-deadline {
+  display: none;
+  position: absolute;
+  right: 100px;
   line-height: 2;
 }
 .todo .icon {
