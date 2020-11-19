@@ -173,8 +173,7 @@ class Task extends Sequelize.Model { }
 Task.init({
   text: Sequelize.TEXT,
   marked: Sequelize.TINYINT,
-  ordinal: Sequelize.INTEGER,
-  date: Sequelize.STRING
+  ordinal: Sequelize.INTEGER
 }, { sequelize, modelName: 'task' });
 
 User.hasMany(Todo);

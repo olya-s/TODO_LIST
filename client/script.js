@@ -199,7 +199,7 @@ async function onPageLoaded() {
   function assignEventHandlers(todo) {
     const h2 = todo.querySelector('h2');
     const tasks = Array.prototype.slice.call(todo.querySelectorAll('.task-text'));
-    const inputDate = document.querySelector('.task-deadline');
+    const inputDate = todo.querySelector('.task-deadline');
 
     todo.addEventListener('click', async (e) => {
       const elem = e.target;
