@@ -264,16 +264,18 @@ async function onPageLoaded() {
           const secondTaskElemId = +secondTaskElem.dataset.id;
           const firstTask = tasksList.find(t => t.id === firstTaskElemId);
           const secondTask = tasksList.find(t => t.id === secondTaskElemId);
-          let buf = firstTaskElem.dataset.ordinal;
-          firstTaskElem.dataset.ordinal = secondTaskElem.dataset.ordinal;
-          secondTaskElem.dataset.ordinal = buf;
+          let buf = firstTask.ordinal;
+          firstTask.ordinal = secondTask.ordinal;
+          secondTask.ordinal = buf;
           const cloneFirstTaskElem = firstTaskElem.cloneNode(true);
           const cloneSecondTaskElem = secondTaskElem.cloneNode(true);
           const parentElement = firstTaskElem.parentElement;
           parentElement.replaceChild(cloneFirstTaskElem, secondTaskElem);
           parentElement.replaceChild(cloneSecondTaskElem, firstTaskElem);
-          await request(`/task/${firstTaskElemId}`, 'PUT', { ...firstTask, ordinal: firstTaskElem.dataset.ordinal });
-          await request(`/task/${secondTaskElemId}`, 'PUT', { ...secondTask, ordinal: secondTaskElem.dataset.ordinal });
+          firstTaskElem.dataset.ordinal = firstTask.ordinal;
+          secondTaskElem.dataset.ordinal = secondTask.ordinal;
+          await request(`/task/${firstTaskElemId}`, 'PUT', { ...firstTask });
+          await request(`/task/${secondTaskElemId}`, 'PUT', { ...secondTask });
         }
       }
 
@@ -347,7 +349,8 @@ async function onPageLoaded() {
       const textSpan = document.createElement('span');
       textSpan.classList.add('task-text');
       textSpan.tabIndex = '-1';
-      textSpan.append(newTask.text);
+      textSpan.textContent = newTask.text;
+      textSpan.title = `deadline: ${newTask.date}`;
       label.append(checkboxSpan, textSpan);
 
       const iconsSpan = document.createElement('span');

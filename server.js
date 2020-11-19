@@ -97,7 +97,7 @@ app.post('/todo/:userId', async (req, res) => {
   res.status(201).json(todo);
 });
 app.post('/task/:todoId', async (req, res) => {
-  let max = await Task.max('ordinal', { where: { todoId: req.params.todoId } });
+  let max = await Task.max('ordinal');
   const task = await Task.create({ ordinal: max + 1, todoId: req.params.todoId, ...req.body });
   res.status(201).json(task);
 });
