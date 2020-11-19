@@ -141,7 +141,7 @@ async function getTasks(id) {
 // ------------------	Sequelize
 
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('mysql://b14946aa18a19e:ea04b13e@us-cdbr-east-02.cleardb.com/heroku_0782ec50ad5f364', { query: { raw: true } });
+const sequelize = new Sequelize('mysql://b554899848de15:4a76021b@us-cdbr-east-02.cleardb.com/heroku_0782ec50ad5f364', { query: { raw: true } });
 
 try {
   sequelize.authenticate()
