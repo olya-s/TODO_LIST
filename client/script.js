@@ -328,6 +328,7 @@ async function onPageLoaded() {
       const li = document.createElement('li');
       li.classList.add('list-item');
       li.dataset.id = newTask.id;
+      li.dataset.ordinal = newTask.ordinal;
 
       const label = document.createElement('label');
       const checkboxSpan = document.createElement('span');
