@@ -141,7 +141,7 @@ async function getTasks(id) {
 // ------------------	Sequelize
 
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('mysql://b14946aa18a19e:ea04b13e@us-cdbr-east-02.cleardb.com/heroku_0af84d1250a300f', { query: { raw: true } });
+const sequelize = new Sequelize('mysql://b14946aa18a19e:ea04b13e@us-cdbr-east-02.cleardb.com/heroku_0782ec50ad5f364', { query: { raw: true } });
 
 try {
   sequelize.authenticate()
@@ -183,7 +183,9 @@ Todo.hasMany(Task);
 Task.belongsTo(Todo);
 
 ; (async () => {
-  await sequelize.sync()
+  await sequelize.sync();
+  let user1 = await User.create({ username: 'user1', password: 'passw1' });
+  let user2 = await User.create({ username: 'user2', password: 'passw2' });
 })();
 
 app.listen(port, () => { console.log(`Server has been started on port ${port}...`) });
