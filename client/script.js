@@ -251,13 +251,19 @@ async function onPageLoaded() {
         const secondTaskElem = elem.closest('li');
         replaceTasks(firstTaskElem, secondTaskElem);
       }
+      else if (elem.type === 'checkbox') {
+        const taskId = +elem.closest('.list-item').dataset.id;
+        const task = tasksList.find(t => t.id === taskId);
+        task.marked = !task.marked;
+        await request(`/task/${taskId}`, 'PUT', { ...task, marked: elem.checked });
+      }
 
       async function replaceTasks(firstTaskElem, secondTaskElem) {
-        const firstTaskElemId = +firstTaskElem.dataset.id;
-        const secondTaskElemId = +secondTaskElem.dataset.id;
-        const firstTask = tasksList.find(t => t.id === firstTaskElemId);
-        const secondTask = tasksList.find(t => t.id === secondTaskElemId);
         if (!!firstTaskElem) {
+          const firstTaskElemId = +firstTaskElem.dataset.id;
+          const secondTaskElemId = +secondTaskElem.dataset.id;
+          const firstTask = tasksList.find(t => t.id === firstTaskElemId);
+          const secondTask = tasksList.find(t => t.id === secondTaskElemId);
           let buf = firstTaskElem.dataset.ordinal;
           firstTaskElem.dataset.ordinal = secondTaskElem.dataset.ordinal;
           secondTaskElem.dataset.ordinal = buf;
@@ -382,14 +388,6 @@ async function onPageLoaded() {
       iconsSpan.append(movingSpan, editSpan, trashSpan);
 
       ul.appendChild(li).append(label, iconsSpan);
-
-      checkboxInput.addEventListener('change', async (e) => {
-        const elem = e.target;
-        const taskId = +elem.closest('.list-item').dataset.id;
-        const task = tasksList.find(t => t.id === taskId);
-        task.marked = !task.marked;
-        await request(`/task/${taskId}`, 'PUT', { ...task, marked: elem.checked });
-      })
     }
   }
 
